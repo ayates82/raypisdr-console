@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>RayPiSDR Field Station</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #1a1a1a;
+            color: #eee;
+            padding: 20px;
+        }
+
+        .topbar {
+            background: #222;
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .topbar .meta {
+            display: flex;
+            gap: 12px;
+            font-size: 0.8em;
+            color: #888;
+            flex-wrap: wrap;
+        }
+
+        .chips {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            font-size: 0.75em;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: #2a2a2a;
+            color: #aaa;
+            border: 1px solid #333;
+        }
+
+        .chip.good  { color: #4caf50; border-color: #2e7d32; }
+        .chip.warn  { color: #facc15; border-color: #a16207; }
+        .chip.bad   { color: #f44336; border-color: #7f1d1d; }
+
+        .status {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .stat { flex: 1; min-width: 120px; }
+        .stat-label { color: #888; font-size: 0.75em; text-transform: uppercase; }
+        .stat-value { font-size: 1.1em; font-weight: bold; margin-top: 2px; }
+
+        .gps-good { color: #4caf50; }
+        .gps-bad  { color: #f44336; }
+
+        .section-title {
+            margin: 18px 0 10px;
+            font-size: 0.8em;
+            color: #777;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        @media (min-width: 700px)  { .grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 1024px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+
+        .tile {
+            background: #2a2a2a;
+            padding: 20px 15px;
+            border-radius: 8px;
+            text-align: center;
+            text-decoration: none;
+            color: #eee;
+            font-size: 0.95em;
+            transition: background 0.15s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            min-height: 90px;
+            justify-content: center;
+        }
+
+        .tile:hover, .tile:active { background: #3a3a3a; }
+        .tile .icon { font-size: 2em; }
+        .tile.control { cursor: pointer; }
+
+        .footer {
+            margin-top: 20px;
+            color: #555;
+            font-size: 0.75em;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+        <div class="meta">
+            <span>HAM: KI5JAS</span> |
+            <span>GMRS: WSBU551</span> |
+            <span id="time">--</span>
+        </div>
+    </div>
+
+    <!-- SYSTEM CHIPS -->
+    <div class="chips">
+        <div class="chip" id="chip-cpu">Temp: --</div>
+        <div class="chip" id="chip-uptime">Uptime: --</div>
+    </div>
+    <div class="chips">
+        <div class="chip" id="chip-cpu-pct">CPU: --</div>
+        <div class="chip" id="chip-cpu-1min">1 Min: --</div>
+        <div class="chip" id="chip-cpu-5min">5 Min: --</div>
+        <div class="chip" id="chip-cpu-15min">15 Min: --</div>
+    </div>
+    <div class="chips">
+        <div class="chip" id="chip-mem">Mem: --</div>
+        <div class="chip" id="chip-disk">Disk: --</div>
+    </div>
+    <br />
+
+    <!-- GPS STATUS -->
+    <div class="status">
+        <div class="stat">
+            <div class="stat-label">Position</div>
+            <div class="stat-value" id="position">acquiring...</div>
+            <div class="stat-label">Elevation</div>
+            <div class="stat-value" id="altitude">--</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">Sats</div>
+            <div class="stat-value" id="sats">--</div>
+            <div class="stat-label">Fix</div>
+            <div class="stat-value" id="fix">--</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">Accuracy</div>
+            <div class="stat-value" id="accuracy">--</div>
+            <div class="stat-label">Speed</div>
+            <div class="stat-value" id="speed">--</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">Heading</div>
+            <div class="stat-value" id="heading">--</div>
+            <div class="stat-label">GPS</div>
+            <div class="stat-value" id="gps-status"><span class="gps-bad">connecting...</span></div>
+        </div>
+    </div>
+
+    <!-- OPERATIONS -->
+    <h2 class="section-title">Operations</h2>
+    <div class="grid">
+        <a href="javascript:void(0)" onclick="window.open('http://'+location.hostname+':8073', '_blank')" class="tile">
+            <span class="icon">📡</span>
+            SDR Receiver
+        </a>
+        <a href="javascript:void(0)" onclick="window.open('/map/', '_blank')" class="tile">
+            <span class="icon">🗺️</span>
+            Map
+        </a>
+        <a href="javascript:void(0)" onclick="window.open('http://'+location.hostname+':8080', '_blank')" class="tile">
+            <span class="icon">📖</span>
+            Kiwix
+        </a>
+        <a href="javascript:void(0)" onclick="window.open('http://'+location.hostname+':6875', '_blank')" class="tile">
+            <span class="icon">📝</span>
+            BookStack
+        </a>
+    </div>
+
+    <!-- CONTROL -->
+    <h2 class="section-title">Control</h2>
+    <div class="grid">
+        <div class="tile control" id="btn-openwebrx" onclick="toggleService('openwebrx')">
+            <span class="icon">📡</span>
+            OpenWebRX
+            <div id="status-openwebrx" class="chip">checking...</div>
+        </div>
+        <div class="tile control" id="btn-sdrpp" onclick="toggleService('sdrpp')">
+            <span class="icon">🔭</span>
+            SDR++
+            <div id="status-sdrpp" class="chip">checking...</div>
+        </div>
+        <div class="tile control" id="btn-direwolf" onclick="toggleService('direwolf')">
+            <span class="icon">📻</span>
+            Direwolf
+            <div id="status-direwolf" class="chip">checking...</div>
+        </div>
+        <div class="tile control" id="btn-direwolf_rtlsdr" onclick="toggleService('direwolf_rtlsdr')">
+            <span class="icon">📻</span>
+            Direwolf RTL-SDR
+            <div id="status-direwolf_rtlsdr" class="chip">checking...</div>
+        </div>
+        <div class="tile control" id="btn-bookstack" onclick="toggleService('bookstack')">
+            <span class="icon">📝</span>
+            BookStack
+            <div id="status-bookstack" class="chip">checking...</div>
+        </div>
+        <div class="tile control" id="btn-kiwix" onclick="toggleService('kiwix')">
+            <span class="icon">📖</span>
+            Kiwix
+            <div id="status-kiwix" class="chip">checking...</div>
+        </div>
+    </div>
+
+    <div class="footer">RayPiSDR • Field Console</div>
+
+    <script>
+        // ── Clock ─────────────────────────────────────────────────────────────
+
+        const _days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const _pad2 = n => n.toString().padStart(2, '0');
+
+        const _tzDisplay = (() => {
+            const now = new Date();
+            const tz = Intl.DateTimeFormat('en-US', { timeZoneName: 'short' })
+                .formatToParts(now).find(p => p.type === 'timeZoneName').value;
+            const off = -now.getTimezoneOffset();
+            const sign = off >= 0 ? '+' : '-';
+            return `${tz} ${sign}${_pad2(Math.floor(Math.abs(off) / 60))}00`;
+        })();
+
+        function updateClock() {
+            const n = new Date();
+            document.getElementById('time').textContent =
+                `${_days[n.getDay()]} ` +
+                `${_pad2(n.getMonth() + 1)}/${_pad2(n.getDate())}/${_pad2(n.getFullYear() % 100)} ` +
+                `${_pad2(n.getHours())}:${_pad2(n.getMinutes())}:${_pad2(n.getSeconds())} ` +
+                _tzDisplay;
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // ── GPS ───────────────────────────────────────────────────────────────
+
+        const _cardinals = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+
+        function connectGPS() {
+            const ws = new WebSocket(`ws://${location.hostname}:2948/gps`);
+
+            ws.onopen = () => {
+                document.getElementById('gps-status').innerHTML = '<span class="gps-good">connected</span>';
+            };
+
+            ws.onmessage = (e) => {
+                const d = JSON.parse(e.data);
+
+                document.getElementById('fix').textContent = d.fix || '--';
+                document.getElementById('sats').textContent =
+                    (d.sats != null && d.sats_visible != null)
+                        ? `${d.sats}/${d.sats_visible}`
+                        : d.sats ?? '--';
+                document.getElementById('accuracy').textContent =
+                    d.eph != null ? `±${d.eph.toFixed(1)} m` : '--';
+
+                if (d.lat && d.lon) {
+                    document.getElementById('position').innerHTML =
+                        `<span class="gps-good">${d.lat.toFixed(4)}, ${d.lon.toFixed(4)}</span>`;
+                    document.getElementById('altitude').textContent =
+                        d.alt ? `${d.alt.toFixed(0)} m / ${(d.alt * 3.28084).toFixed(0)} ft` : '--';
+
+                    const mph = d.speed != null ? d.speed * 2.237 : null;
+                    document.getElementById('speed').textContent =
+                        mph != null ? mph.toFixed(1) + ' mph' : '--';
+
+                    // track is nulled at source when speed < 0.5 m/s
+                    document.getElementById('heading').textContent =
+                        d.track != null
+                            ? `${d.track.toFixed(0)}° ${_cardinals[Math.round(d.track / 22.5) % 16]}`
+                            : '--';
+                }
+            };
+
+            ws.onclose = () => {
+                document.getElementById('gps-status').innerHTML = '<span class="gps-bad">offline</span>';
+                setTimeout(connectGPS, 2000);
+            };
+        }
+        connectGPS();
+
+        // ── Service status ────────────────────────────────────────────────────
+
+        const SERVICE_URLS = {
+            openwebrx:       '/api/sdr/openwebrx',
+            sdrpp:           '/api/sdr/sdrpp',
+            direwolf:        '/api/sdr/direwolf',
+            direwolf_rtlsdr: '/api/sdr/direwolf/rtlsdr',
+            bookstack:       '/api/bookstack',
+            kiwix:           '/api/kiwix',
+        };
+
+        function setChip(id, label, state) {
+            const el = document.getElementById(id);
+            el.textContent = label;
+            el.className = 'chip' + (state ? ` ${state}` : '');
+        }
+
+        function updateServiceTile(name, svc) {
+            const running = svc.running;
+            const reachable = svc.reachable;
+            const btn = document.getElementById(`btn-${name}`);
+            btn.style.borderLeft = running ? '4px solid #4caf50' : '4px solid #555';
+
+            let label, state;
+            if (running && reachable) {
+                label = 'RUNNING'; state = 'good';
+            } else if (running && !reachable) {
+                label = 'STARTING'; state = 'warn';
+            } else {
+                label = 'STOPPED'; state = 'bad';
+            }
+            setChip(`status-${name}`, label, state);
+        }
+
+        async function fetchStatus() {
+            try {
+                const r = await fetch('/api/status');
+                const d = await r.json();
+                const svcs = d.services;
+                Object.keys(SERVICE_URLS).forEach(name => {
+                    if (svcs[name]) updateServiceTile(name, svcs[name]);
+                });
+                updateSystemChips(d.system);
+            } catch (e) {
+                console.error('[status] fetch failed:', e);
+            }
+        }
+
+        async function toggleService(name) {
+            const chipEl = document.getElementById(`status-${name}`);
+            const running = chipEl.textContent === 'RUNNING' || chipEl.textContent === 'STARTING';
+            setChip(`status-${name}`, 'WORKING...', 'warn');
+            try {
+                await fetch(`${SERVICE_URLS[name]}/${running ? 'stop' : 'start'}`);
+                setTimeout(fetchStatus, 2000);
+            } catch (e) {
+                console.error(`[${name}] toggle failed:`, e);
+                setTimeout(fetchStatus, 2000);
+            }
+        }
+
+        // ── System chips ──────────────────────────────────────────────────────
+
+        function updateSystemChips(s) {
+            const tempC = s.temp_c;
+            const tempF = tempC != null ? (tempC * 9 / 5 + 32) : null;
+            setChip('chip-cpu',
+                `Temp: ${tempC != null ? tempC.toFixed(0) + '°C / ' + tempF.toFixed(0) + '°F' : '--'}`,
+                tempC > 70 ? 'bad' : tempC > 55 ? 'warn' : 'good'
+            );
+
+            setChip('chip-uptime', `Uptime: ${s.uptime ?? '--'}`, 'good');
+
+            setChip('chip-cpu-pct',
+                `CPU: ${s.cpu_percent != null ? s.cpu_percent.toFixed(0) + '%' : '--'}`,
+                s.cpu_percent > 70 ? 'bad' : s.cpu_percent > 55 ? 'warn' : 'good'
+            );
+
+            setChip('chip-cpu-1min',
+                `1 min: ${s.cpu_avg_1m != null ? s.cpu_avg_1m.toFixed(0) + '%' : '--'}`,
+                s.cpu_avg_1m > 70 ? 'bad' : s.cpu_avg_1m > 55 ? 'warn' : 'good'
+            );
+
+            setChip('chip-cpu-5min',
+                `5 min: ${s.cpu_avg_5m != null ? s.cpu_avg_5m.toFixed(0) + '%' : '--'}`,
+                s.cpu_avg_5m > 70 ? 'bad' : s.cpu_avg_5m > 55 ? 'warn' : 'good'
+            );
+
+            setChip('chip-cpu-15min',
+                `15 min: ${s.cpu_avg_15m != null ? s.cpu_avg_15m.toFixed(0) + '%' : '--'}`,
+                s.cpu_avg_15m > 70 ? 'bad' : s.cpu_avg_15m > 55 ? 'warn' : 'good'
+            );
+
+            const memPct = s.mem_percent;
+            setChip('chip-mem',
+                `Mem: ${memPct != null ? memPct.toFixed(0) + '% / ' + s.mem_used_mb + ' MB / ' + s.mem_total_mb + ' MB' : '--'}`,
+                memPct > 70 ? 'bad' : memPct > 55 ? 'warn' : 'good'
+            );
+
+            const diskPct = s.disk_percent;
+            setChip('chip-disk',
+                `Disk: ${diskPct != null ? diskPct.toFixed(0) + '% / ' + s.disk_used_gb + ' GB / ' + s.disk_total_gb + ' GB' : '--'}`,
+                diskPct > 70 ? 'bad' : diskPct > 55 ? 'warn' : 'good'
+            );
+        }
+
+        fetchStatus();
+        setInterval(fetchStatus, 5000);
+    </script>
+</body>
+
+</html>
