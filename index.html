@@ -6,11 +6,7 @@
     <title>RayPiSDR Field Station</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -34,12 +30,7 @@
             flex-wrap: wrap;
         }
 
-        .chips {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-            flex-wrap: wrap;
-        }
+        .chips { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 
         .chip {
             font-size: 0.75em;
@@ -50,9 +41,9 @@
             border: 1px solid #333;
         }
 
-        .chip.good  { color: #4caf50; border-color: #2e7d32; }
-        .chip.warn  { color: #facc15; border-color: #a16207; }
-        .chip.bad   { color: #f44336; border-color: #7f1d1d; }
+        .chip.good { color: #4caf50; border-color: #2e7d32; }
+        .chip.warn { color: #facc15; border-color: #a16207; }
+        .chip.bad  { color: #f44336; border-color: #7f1d1d; }
 
         .status {
             background: #2a2a2a;
@@ -109,12 +100,154 @@
         .tile .icon { font-size: 2em; }
         .tile.control { cursor: pointer; }
 
-        .footer {
-            margin-top: 20px;
-            color: #555;
-            font-size: 0.75em;
-            text-align: center;
+        /* ── Nearby Repeaters ──────────────────────────────────────────── */
+        #repeater-panel { background: #2a2a2a; border-radius: 8px; overflow: hidden; }
+
+        #repeater-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: #1e3a5f;
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.85em;
+            font-weight: bold;
         }
+
+        #repeater-panel-header .rpt-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.85em;
+            font-weight: normal;
+            color: #aac4e8;
+        }
+
+        #repeater-panel-header select {
+            background: #1a2e4a;
+            color: #aac4e8;
+            border: 1px solid #2a5080;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+
+        #repeater-panel-body { display: none; max-height: 320px; overflow-y: auto; }
+        #repeater-panel-body.open { display: block; }
+
+        .rpt-row {
+            display: grid;
+            grid-template-columns: 1fr 1.4fr 1fr 0.6fr 0.7fr 0.8fr;
+            padding: 8px 14px;
+            border-bottom: 1px solid #333;
+            font-size: 0.82em;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .rpt-row:last-child { border-bottom: none; }
+        .rpt-row:hover { background: #333; }
+
+        .rpt-header {
+            background: #222;
+            color: #888;
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 6px 14px;
+            display: grid;
+            grid-template-columns: 1fr 1.4fr 1fr 0.6fr 0.7fr 0.8fr;
+            gap: 8px;
+        }
+
+        .rpt-call { font-weight: bold; color: #eee; }
+        .rpt-freq { font-family: monospace; color: #4ade80; }
+        .rpt-city { color: #aaa; }
+        .rpt-band { color: #facc15; font-size: 0.85em; }
+        .rpt-dist { color: #60a5fa; text-align: right; }
+        .rpt-empty { padding: 14px; text-align: center; color: #555; font-size: 0.85em; }
+
+        /* ── APRS Panel ────────────────────────────────────────────────── */
+        #aprs-log-panel { background: #2a2a2a; border-radius: 8px; overflow: hidden; }
+
+        #aprs-log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: #1e3a5f;
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        #aprs-log-header .aprs-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.85em;
+            font-weight: normal;
+            color: #aac4e8;
+        }
+
+        #aprs-log-header select {
+            background: #1a2e4a;
+            color: #aac4e8;
+            border: 1px solid #2a5080;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+
+        #aprs-log-body { display: none; max-height: 320px; overflow-y: auto; }
+        #aprs-log-body.open { display: block; }
+
+        .aprs-log-header-row {
+            background: #222;
+            color: #888;
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 6px 14px;
+            display: grid;
+            grid-template-columns: 1fr 0.7fr 0.8fr 0.7fr;
+            gap: 8px;
+        }
+
+        .aprs-log-row {
+            display: grid;
+            grid-template-columns: 1fr 0.7fr 0.8fr 0.7fr;
+            padding: 8px 14px;
+            border-bottom: 1px solid #333;
+            font-size: 0.82em;
+            gap: 8px;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .aprs-log-row:last-child { border-bottom: none; }
+        .aprs-log-row:hover { background: #333; }
+
+        .aprs-log-call { font-weight: bold; color: #f97316; }
+        .aprs-log-dist { color: #60a5fa; }
+        .aprs-log-age  { color: #aaa; }
+        .aprs-log-src {
+            display: inline-block;
+            font-size: 0.8em;
+            padding: 1px 6px;
+            border-radius: 999px;
+            background: #1e3a5f;
+            color: #aac4e8;
+        }
+
+        .aprs-log-empty { padding: 14px; text-align: center; color: #555; font-size: 0.85em; }
+
+        /* ── Footer ────────────────────────────────────────────────────── */
+        .footer { margin-top: 20px; color: #555; font-size: 0.75em; text-align: center; }
     </style>
 </head>
 
@@ -178,54 +311,93 @@
     <h2 class="section-title">Operations</h2>
     <div class="grid">
         <a href="javascript:void(0)" onclick="window.open('http://'+location.hostname+':8073', '_blank')" class="tile">
-            <span class="icon">📡</span>
-            SDR Receiver
+            <span class="icon">📡</span>SDR Receiver
         </a>
         <a href="javascript:void(0)" onclick="window.open('/map/', '_blank')" class="tile">
-            <span class="icon">🗺️</span>
-            Map
+            <span class="icon">🗺️</span>Map
         </a>
         <a href="javascript:void(0)" onclick="window.open('http://'+location.hostname+':8080', '_blank')" class="tile">
-            <span class="icon">📖</span>
-            Kiwix
+            <span class="icon">📖</span>Kiwix
         </a>
         <a href="javascript:void(0)" onclick="window.open('http://'+location.hostname+':6875', '_blank')" class="tile">
-            <span class="icon">📝</span>
-            BookStack
+            <span class="icon">📝</span>BookStack
         </a>
+    </div>
+
+    <!-- NEARBY REPEATERS -->
+    <h2 class="section-title">Nearby Repeaters</h2>
+    <div id="repeater-panel">
+        <div id="repeater-panel-header" onclick="toggleRepeaterPanel()">
+            <span>📻 Repeaters <span id="rpt-count"></span></span>
+            <div class="rpt-meta">
+                <span id="rpt-last-updated"></span>
+                <label onclick="event.stopPropagation()">
+                    Within
+                    <select id="rpt-distance" onchange="updateRepeaterList()">
+                        <option value="10" selected>10 mi</option>
+                        <option value="25">25 mi</option>
+                        <option value="50">50 mi</option>
+                        <option value="9999">All</option>
+                    </select>
+                </label>
+                <span id="rpt-chevron">▲</span>
+            </div>
+        </div>
+        <div id="repeater-panel-body" class="open">
+            <div class="rpt-empty" id="rpt-empty">Waiting for GPS fix...</div>
+        </div>
+    </div>
+
+    <!-- APRS LOG -->
+    <h2 class="section-title">APRS Stations Heard</h2>
+    <div id="aprs-log-panel">
+        <div id="aprs-log-header" onclick="toggleAprsPanel()">
+            <span>📻 APRS <span id="aprs-log-count"></span></span>
+            <div class="aprs-meta">
+                <span id="aprs-log-updated"></span>
+                <label onclick="event.stopPropagation()">
+                    Show
+                    <select id="aprs-ttl" onchange="fetchAPRS()">
+                        <option value="1800">30 min</option>
+                        <option value="3600">1 hr</option>
+                        <option value="7200" selected>2 hr</option>
+                        <option value="21600">6 hr</option>
+                        <option value="86400">24 hr</option>
+                    </select>
+                </label>
+                <span id="aprs-log-chevron">▲</span>
+            </div>
+        </div>
+        <div id="aprs-log-body" class="open">
+            <div class="aprs-log-empty" id="aprs-log-empty">No stations heard yet</div>
+        </div>
     </div>
 
     <!-- CONTROL -->
     <h2 class="section-title">Control</h2>
     <div class="grid">
         <div class="tile control" id="btn-openwebrx" onclick="toggleService('openwebrx')">
-            <span class="icon">📡</span>
-            OpenWebRX
+            <span class="icon">📡</span>OpenWebRX
             <div id="status-openwebrx" class="chip">checking...</div>
         </div>
         <div class="tile control" id="btn-sdrpp" onclick="toggleService('sdrpp')">
-            <span class="icon">🔭</span>
-            SDR++
+            <span class="icon">🔭</span>SDR++
             <div id="status-sdrpp" class="chip">checking...</div>
         </div>
         <div class="tile control" id="btn-direwolf" onclick="toggleService('direwolf')">
-            <span class="icon">📻</span>
-            Direwolf
+            <span class="icon">📻</span>Direwolf
             <div id="status-direwolf" class="chip">checking...</div>
         </div>
         <div class="tile control" id="btn-direwolf_rtlsdr" onclick="toggleService('direwolf_rtlsdr')">
-            <span class="icon">📻</span>
-            Direwolf RTL-SDR
+            <span class="icon">📻</span>Direwolf RTL-SDR
             <div id="status-direwolf_rtlsdr" class="chip">checking...</div>
         </div>
         <div class="tile control" id="btn-bookstack" onclick="toggleService('bookstack')">
-            <span class="icon">📝</span>
-            BookStack
+            <span class="icon">📝</span>BookStack
             <div id="status-bookstack" class="chip">checking...</div>
         </div>
         <div class="tile control" id="btn-kiwix" onclick="toggleService('kiwix')">
-            <span class="icon">📖</span>
-            Kiwix
+            <span class="icon">📖</span>Kiwix
             <div id="status-kiwix" class="chip">checking...</div>
         </div>
     </div>
@@ -261,6 +433,8 @@
         // ── GPS ───────────────────────────────────────────────────────────────
 
         const _cardinals = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+        let _currentLat = null;
+        let _currentLon = null;
 
         function connectGPS() {
             const ws = new WebSocket(`ws://${location.hostname}:2948/gps`);
@@ -271,7 +445,6 @@
 
             ws.onmessage = (e) => {
                 const d = JSON.parse(e.data);
-
                 document.getElementById('fix').textContent = d.fix || '--';
                 document.getElementById('sats').textContent =
                     (d.sats != null && d.sats_visible != null)
@@ -281,16 +454,15 @@
                     d.eph != null ? `±${d.eph.toFixed(1)} m` : '--';
 
                 if (d.lat && d.lon) {
+                    _currentLat = d.lat;
+                    _currentLon = d.lon;
                     document.getElementById('position').innerHTML =
                         `<span class="gps-good">${d.lat.toFixed(4)}, ${d.lon.toFixed(4)}</span>`;
                     document.getElementById('altitude').textContent =
                         d.alt ? `${d.alt.toFixed(0)} m / ${(d.alt * 3.28084).toFixed(0)} ft` : '--';
-
                     const mph = d.speed != null ? d.speed * 2.237 : null;
                     document.getElementById('speed').textContent =
                         mph != null ? mph.toFixed(1) + ' mph' : '--';
-
-                    // track is nulled at source when speed < 0.5 m/s
                     document.getElementById('heading').textContent =
                         d.track != null
                             ? `${d.track.toFixed(0)}° ${_cardinals[Math.round(d.track / 22.5) % 16]}`
@@ -304,6 +476,241 @@
             };
         }
         connectGPS();
+
+        // ── Haversine ─────────────────────────────────────────────────────────
+
+        function haversine(lat1, lon1, lat2, lon2) {
+            const R = 3958.8;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) ** 2 +
+                Math.cos(lat1 * Math.PI / 180) *
+                Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) ** 2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        // ── Repeater panel ────────────────────────────────────────────────────
+
+        let _repeaters = [];
+        let _repeaterPanelOpen = true;
+        let _repeaterLastFetch = 0;
+
+        const BAND_MOD = { '2m': 'nfm', '70cm': 'nfm', 'gmrs': 'nfm' };
+
+        function repeaterFreqHz(freqStr) {
+            return Math.round(parseFloat(freqStr.split('-')[0].trim()) * 1e6);
+        }
+
+        function formatFreq(freqStr) {
+            const parts = freqStr.split('-');
+            const mhz = parseFloat(parts[0].trim()).toFixed(3);
+            const tone = parts[1] ? parts[1].trim() : null;
+            return tone ? `${mhz} / ${tone}` : mhz;
+        }
+
+        function openRepeaterInWebRX(r) {
+            const svc = document.getElementById('status-openwebrx');
+            if (!svc || svc.textContent !== 'RUNNING') {
+                alert('SDR Receiver is not running.\nStart OpenWebRX from the Control panel first.');
+                return;
+            }
+            const hz  = repeaterFreqHz(r.freq);
+            const mod = BAND_MOD[r.band.toLowerCase()] || 'nfm';
+            window.open(`http://${location.hostname}:8073/#freq=${hz},mod=${mod}`, '_blank');
+        }
+
+        function bearing(lat1, lon1, lat2, lon2) {
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const rlat1 = lat1 * Math.PI / 180;
+            const rlat2 = lat2 * Math.PI / 180;
+            const x = Math.sin(dLon) * Math.cos(rlat2);
+            const y = Math.cos(rlat1) * Math.sin(rlat2) - Math.sin(rlat1) * Math.cos(rlat2) * Math.cos(dLon);
+            const deg = (Math.atan2(x, y) * 180 / Math.PI + 360) % 360;
+            const cardinal = _cardinals[Math.round(deg / 22.5) % 16];
+            return `${deg.toFixed(0)}° ${cardinal}`;
+        }
+
+        async function loadRepeaters() {
+            try {
+                const r = await fetch('/map/repeaters.json');
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                const all = await r.json();
+                _repeaters = all.filter(r => r.status === 'Yes');
+                updateRepeaterList();
+            } catch (e) {
+                console.error('[Repeaters] failed to load:', e);
+                document.getElementById('rpt-empty').textContent = '⚠ Failed to load repeater data';
+            }
+        }
+
+        function updateRepeaterList() {
+            const body      = document.getElementById('repeater-panel-body');
+            const empty     = document.getElementById('rpt-empty');
+            const countEl   = document.getElementById('rpt-count');
+            const updatedEl = document.getElementById('rpt-last-updated');
+            const maxDist   = parseFloat(document.getElementById('rpt-distance').value);
+
+            body.querySelectorAll('.rpt-header, .rpt-row').forEach(el => el.remove());
+
+            if (_currentLat === null || _currentLon === null) {
+                empty.style.display = 'block';
+                empty.textContent = 'Waiting for GPS fix...';
+                countEl.textContent = '';
+                return;
+            }
+
+            const nearby = _repeaters
+                .map(r => ({ ...r, dist: haversine(_currentLat, _currentLon, r.lat, r.lon) }))
+                .filter(r => r.dist <= maxDist)
+                .sort((a, b) => a.dist - b.dist);
+
+            updatedEl.textContent = `updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            countEl.textContent = `(${nearby.length})`;
+
+            if (nearby.length === 0) {
+                empty.style.display = 'block';
+                empty.textContent = `No repeaters within ${maxDist} mi`;
+                return;
+            }
+
+            empty.style.display = 'none';
+
+            const header = document.createElement('div');
+            header.className = 'rpt-header';
+            header.innerHTML = `
+                <span>Callsign</span>
+                <span>Frequency</span>
+                <span>City</span>
+                <span>Band</span>
+                <span style="text-align:right">Distance</span>
+                <span>Bearing</span>
+            `;
+            body.insertBefore(header, empty);
+
+            nearby.forEach(r => {
+                const row = document.createElement('div');
+                row.className = 'rpt-row';
+                row.style.cursor = 'pointer';
+                row.title = `Open ${r.callsign} in SDR Receiver`;
+                row.innerHTML = `
+                    <span class="rpt-call">${r.callsign}</span>
+                    <span class="rpt-freq">${formatFreq(r.freq)}</span>
+                    <span class="rpt-city">${r.city}</span>
+                    <span class="rpt-band">${r.band}</span>
+                    <span class="rpt-dist">${r.dist.toFixed(1)} mi</span>
+                    <span class="rpt-dist">${bearing(_currentLat, _currentLon, r.lat, r.lon)}</span>
+                `;
+                row.addEventListener('click', () => openRepeaterInWebRX(r));
+                body.insertBefore(row, empty);
+            });
+        }
+
+        function toggleRepeaterPanel() {
+            _repeaterPanelOpen = !_repeaterPanelOpen;
+            document.getElementById('repeater-panel-body').classList.toggle('open', _repeaterPanelOpen);
+            document.getElementById('rpt-chevron').textContent = _repeaterPanelOpen ? '▲' : '▼';
+        }
+
+        function repeaterTick() {
+            const now = Date.now();
+            if (now - _repeaterLastFetch > 5 * 60 * 1000) {
+                _repeaterLastFetch = now;
+                updateRepeaterList();
+            }
+        }
+
+        loadRepeaters();
+        setInterval(repeaterTick, 60 * 1000);
+
+        // ── APRS Log ──────────────────────────────────────────────────────────
+
+        let _aprsLogOpen = true;
+
+        function relativeAge(isoString) {
+            const diffMs = Date.now() - new Date(isoString + 'Z').getTime();
+            const mins = Math.floor(diffMs / 60000);
+            if (mins < 1)  return 'just now';
+            if (mins < 60) return `${mins}m ago`;
+            const hrs = Math.floor(mins / 60);
+            if (hrs < 24)  return `${hrs}h ${mins % 60}m ago`;
+            return `${Math.floor(hrs / 24)}d ago`;
+        }
+
+        async function fetchAPRS() {
+            const ttl = document.getElementById('aprs-ttl')?.value || 7200;
+            try {
+                const r = await fetch(`/api/aprs/stations?ttl=${ttl}`);
+                const d = await r.json();
+                updateAprsPanel(d.stations);
+                document.getElementById('aprs-log-updated').textContent =
+                    `updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            } catch (e) {
+                console.error('[APRS] fetch failed:', e);
+                document.getElementById('aprs-log-updated').textContent = '⚠ offline';
+            }
+        }
+
+        function updateAprsPanel(stations) {
+            const body  = document.getElementById('aprs-log-body');
+            const empty = document.getElementById('aprs-log-empty');
+            const count = document.getElementById('aprs-log-count');
+
+            body.querySelectorAll('.aprs-log-header-row, .aprs-log-row').forEach(el => el.remove());
+            count.textContent = `(${stations.length})`;
+
+            if (stations.length === 0) {
+                empty.style.display = 'block';
+                return;
+            }
+
+            empty.style.display = 'none';
+
+            const sorted = [...stations].sort((a, b) =>
+                new Date(b.last_heard) - new Date(a.last_heard)
+            );
+
+            const header = document.createElement('div');
+            header.className = 'aprs-log-header-row';
+            header.innerHTML = `
+                <span>Callsign</span>
+                <span>Distance</span>
+                <span>Last Heard</span>
+                <span>Source</span>
+            `;
+            body.insertBefore(header, empty);
+
+            sorted.forEach(s => {
+                const dist = (_currentLat !== null && s.lat && s.lon)
+                    ? haversine(_currentLat, _currentLon, s.lat, s.lon).toFixed(1) + ' mi'
+                    : '--';
+
+                const row = document.createElement('div');
+                row.className = 'aprs-log-row';
+                row.title = `Open ${s.callsign} on map`;
+                row.innerHTML = `
+                    <span class="aprs-log-call">${s.callsign}</span>
+                    <span class="aprs-log-dist">${dist}</span>
+                    <span class="aprs-log-age">${relativeAge(s.last_heard)}</span>
+                    <span class="aprs-log-src">${s.source}</span>
+                `;
+                row.addEventListener('click', () => {
+                    if (s.lat && s.lon) {
+                        window.open(`/map/#${s.lat},${s.lon},14`, '_blank');
+                    }
+                });
+                body.insertBefore(row, empty);
+            });
+        }
+
+        function toggleAprsPanel() {
+            _aprsLogOpen = !_aprsLogOpen;
+            document.getElementById('aprs-log-body').classList.toggle('open', _aprsLogOpen);
+            document.getElementById('aprs-log-chevron').textContent = _aprsLogOpen ? '▲' : '▼';
+        }
+
+        fetchAPRS();
+        setInterval(fetchAPRS, 30000);
 
         // ── Service status ────────────────────────────────────────────────────
 
@@ -323,19 +730,12 @@
         }
 
         function updateServiceTile(name, svc) {
-            const running = svc.running;
-            const reachable = svc.reachable;
             const btn = document.getElementById(`btn-${name}`);
-            btn.style.borderLeft = running ? '4px solid #4caf50' : '4px solid #555';
-
+            btn.style.borderLeft = svc.running ? '4px solid #4caf50' : '4px solid #555';
             let label, state;
-            if (running && reachable) {
-                label = 'RUNNING'; state = 'good';
-            } else if (running && !reachable) {
-                label = 'STARTING'; state = 'warn';
-            } else {
-                label = 'STOPPED'; state = 'bad';
-            }
+            if (svc.running && svc.reachable)       { label = 'RUNNING';  state = 'good'; }
+            else if (svc.running && !svc.reachable) { label = 'STARTING'; state = 'warn'; }
+            else                                     { label = 'STOPPED';  state = 'bad';  }
             setChip(`status-${name}`, label, state);
         }
 
@@ -343,9 +743,8 @@
             try {
                 const r = await fetch('/api/status');
                 const d = await r.json();
-                const svcs = d.services;
                 Object.keys(SERVICE_URLS).forEach(name => {
-                    if (svcs[name]) updateServiceTile(name, svcs[name]);
+                    if (d.services[name]) updateServiceTile(name, d.services[name]);
                 });
                 updateSystemChips(d.system);
             } catch (e) {
@@ -375,35 +774,28 @@
                 `Temp: ${tempC != null ? tempC.toFixed(0) + '°C / ' + tempF.toFixed(0) + '°F' : '--'}`,
                 tempC > 70 ? 'bad' : tempC > 55 ? 'warn' : 'good'
             );
-
             setChip('chip-uptime', `Uptime: ${s.uptime ?? '--'}`, 'good');
-
             setChip('chip-cpu-pct',
                 `CPU: ${s.cpu_percent != null ? s.cpu_percent.toFixed(0) + '%' : '--'}`,
                 s.cpu_percent > 70 ? 'bad' : s.cpu_percent > 55 ? 'warn' : 'good'
             );
-
             setChip('chip-cpu-1min',
                 `1 min: ${s.cpu_avg_1m != null ? s.cpu_avg_1m.toFixed(0) + '%' : '--'}`,
                 s.cpu_avg_1m > 70 ? 'bad' : s.cpu_avg_1m > 55 ? 'warn' : 'good'
             );
-
             setChip('chip-cpu-5min',
                 `5 min: ${s.cpu_avg_5m != null ? s.cpu_avg_5m.toFixed(0) + '%' : '--'}`,
                 s.cpu_avg_5m > 70 ? 'bad' : s.cpu_avg_5m > 55 ? 'warn' : 'good'
             );
-
             setChip('chip-cpu-15min',
                 `15 min: ${s.cpu_avg_15m != null ? s.cpu_avg_15m.toFixed(0) + '%' : '--'}`,
                 s.cpu_avg_15m > 70 ? 'bad' : s.cpu_avg_15m > 55 ? 'warn' : 'good'
             );
-
             const memPct = s.mem_percent;
             setChip('chip-mem',
                 `Mem: ${memPct != null ? memPct.toFixed(0) + '% / ' + s.mem_used_mb + ' MB / ' + s.mem_total_mb + ' MB' : '--'}`,
                 memPct > 70 ? 'bad' : memPct > 55 ? 'warn' : 'good'
             );
-
             const diskPct = s.disk_percent;
             setChip('chip-disk',
                 `Disk: ${diskPct != null ? diskPct.toFixed(0) + '% / ' + s.disk_used_gb + ' GB / ' + s.disk_total_gb + ' GB' : '--'}`,
