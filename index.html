@@ -565,7 +565,7 @@
                 .filter(r => r.dist <= maxDist)
                 .sort((a, b) => a.dist - b.dist);
 
-            updatedEl.textContent = `updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            updatedEl.textContent = `updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}`;
             countEl.textContent = `(${nearby.length})`;
 
             if (nearby.length === 0) {
@@ -644,7 +644,7 @@
                 const d = await r.json();
                 updateAprsPanel(d.stations);
                 document.getElementById('aprs-log-updated').textContent =
-                    `updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                    `updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}`;
             } catch (e) {
                 console.error('[APRS] fetch failed:', e);
                 document.getElementById('aprs-log-updated').textContent = '⚠ offline';
