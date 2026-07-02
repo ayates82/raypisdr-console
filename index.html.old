@@ -277,9 +277,6 @@
         <div class="chip" id="chip-mem">Mem: --</div>
         <div class="chip" id="chip-disk">Disk: --</div>
     </div>
-    <div class="chips">
-        <div class="chip" id="chip-gps">GPS: connecting...</div>
-    </div>
     <br />
 
     <!-- GPS STATUS -->
@@ -287,26 +284,28 @@
         <div class="stat">
             <div class="stat-label">Position</div>
             <div class="stat-value" id="position">acquiring...</div>
-            <div class="stat-label">Grid</div>
-            <div class="stat-value" id="gridSquare">--</div>
-        </div>
-        <div class="stat">
             <div class="stat-label">Elevation</div>
             <div class="stat-value" id="altitude">--</div>
-            <div class="stat-label">Accuracy</div>
-            <div class="stat-value" id="accuracy">--</div>
-        </div>
-        <div class="stat">
-            <div class="stat-label">Heading</div>
-            <div class="stat-value" id="heading">--</div>
-            <div class="stat-label">Speed</div>
-            <div class="stat-value" id="speed">--</div>
         </div>
         <div class="stat">
             <div class="stat-label">Sats</div>
             <div class="stat-value" id="sats">--</div>
             <div class="stat-label">Fix</div>
             <div class="stat-value" id="fix">--</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">Accuracy</div>
+            <div class="stat-value" id="accuracy">--</div>
+            <div class="stat-label">Speed</div>
+            <div class="stat-value" id="speed">--</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">Heading</div>
+            <div class="stat-value" id="heading">--</div>
+            <!-- <div class="stat-label">GPS</div>
+            <div class="stat-value" id="gps-status"><span class="gps-bad">connecting...</span></div> -->
+            <div class="stat-label">Grid</div>
+            <div class="stat-value" id="gridSquare">--</div>
         </div>
     </div>
 
@@ -443,7 +442,7 @@
             const ws = new WebSocket(`ws://${location.hostname}:2948/gps`);
 
             ws.onopen = () => {
-                setChip('chip-gps', 'GPS: connected', 'good');
+                document.getElementById('gps-status').innerHTML = '<span class="gps-good">connected</span>';
             };
 
             ws.onmessage = (e) => {
@@ -476,7 +475,7 @@
             };
 
             ws.onclose = () => {
-                setChip('chip-gps', 'GPS: offline', 'bad');
+                document.getElementById('gps-status').innerHTML = '<span class="gps-bad">offline</span>';
                 setTimeout(connectGPS, 2000);
             };
         }
